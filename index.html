@@ -306,15 +306,63 @@
         <img src="https://assets.coingecko.com/coins/images/2/large/litecoin.png" alt="LTC" />
         <div>
           <h1>Litecoin × WATTx</h1>
-          <div class="sub">Scrypt · Coming Soon</div>
+          <div class="sub">Scrypt · Merge mine LTC and earn WTX simultaneously</div>
         </div>
       </div>
       <div class="cards">
         <div class="card"><div class="label">Algorithm</div><div class="value">Scrypt</div></div>
-        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3337</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
         <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
       </div>
-      <div class="info-box">Scrypt merged mining support is implemented in WATTx core. A public Litecoin node with mining RPC access is required to activate this stratum. Support for Dogecoin (also Scrypt) will be enabled on the same port.
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3337</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_LTC_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>Antminer L9 / L7 (ASIC)</h3>
+          <pre>Pool URL:  stratum+tcp://stratum.wattxchange.app:3337
+Worker:    YOUR_LTC_ADDRESS.WORKER
+Password:  YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CGMiner</h3>
+          <pre>cgminer --scrypt \
+  -o stratum+tcp://stratum.wattxchange.app:3337 \
+  -u YOUR_LTC_ADDRESS.WORKER \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CPUMiner</h3>
+          <pre>cpuminer -a scrypt \
+  -o stratum+tcp://stratum.wattxchange.app:3337 \
+  -u YOUR_LTC_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Litecoin</strong> is the original Scrypt merge-mining chain. Dogecoin (also Scrypt) will be supported on the same port 3337 once active. Live public ElectrumX servers are available at <code>electrum-ltc.bysh.me:50001</code> and <code>electrum.ltc.xurious.com:50001</code>, enabling trustless payouts and atomic swaps without running a full node.
       </div>
     </div>
 
@@ -324,15 +372,63 @@
         <img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png" alt="BTC" />
         <div>
           <h1>Bitcoin × WATTx</h1>
-          <div class="sub">SHA-256d · Coming Soon</div>
+          <div class="sub">SHA-256d · Merge mine BTC and earn WTX simultaneously</div>
         </div>
       </div>
       <div class="cards">
         <div class="card"><div class="label">Algorithm</div><div class="value">SHA-256d</div></div>
-        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3336</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
         <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
       </div>
-      <div class="info-box">SHA-256d merged mining support is implemented in WATTx core. Requires access to a Bitcoin node with <code>getblocktemplate</code> RPC. BCH and BSV are also supported on this algorithm.
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3336</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_BTC_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>Antminer S21 / S19 (ASIC)</h3>
+          <pre>Pool URL:  stratum+tcp://stratum.wattxchange.app:3336
+Worker:    YOUR_BTC_ADDRESS.WORKER
+Password:  YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CGMiner / BFGMiner</h3>
+          <pre>cgminer \
+  -o stratum+tcp://stratum.wattxchange.app:3336 \
+  -u YOUR_BTC_ADDRESS.WORKER \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CPUMiner</h3>
+          <pre>cpuminer -a sha256d \
+  -o stratum+tcp://stratum.wattxchange.app:3336 \
+  -u YOUR_BTC_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Bitcoin</strong> SHA-256d merge mining is implemented in WATTx core. BCH and BSV are also supported on this algorithm and can share port 3336 simultaneously. Live public ElectrumX servers are available at <code>electrum1-3.cipig.net:10000</code> (Komodo/AtomicDEX infrastructure), enabling trustless payouts and atomic swaps without running a full node.
       </div>
     </div>
 

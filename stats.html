@@ -311,15 +311,15 @@ const API = 'https://api.wattxchange.app';
 const STRATUM_HOST = 'stratum.wattxchange.app';
 
 const CHAINS = [
-  { id:'xmr',  name:'Monero',       ticker:'XMR',  algo:'RandomX',    port:3334, color:'#ff6600', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/XMR%20logo.png',  coinType:128,  live:true,  evmChain:false, xmr:true  },
+  { id:'xmr',  name:'Monero',       ticker:'XMR',  algo:'RandomX',    port:3334, color:'#ff6600', img:'https://assets.coingecko.com/coins/images/69/large/monero_logo.png',  coinType:128,  live:true,  evmChain:false, xmr:true  },
   { id:'alt',  name:'Altcoinchain', ticker:'ALT',  algo:'Ethash',     port:3333, color:'#dc2626', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/Altcoinchain%20logo.png', coinType:60, live:true, evmChain:true, xmr:false },
   { id:'octa', name:'Octaspace',    ticker:'OCTA', algo:'Ethash',     port:3333, color:'#6366f1', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png',  coinType:60,   live:false, evmChain:true, xmr:false, note:'Shares port 3333 with ALT' },
-  { id:'ltc',  name:'Litecoin',     ticker:'LTC',  algo:'Scrypt',     port:3337, color:'#8cc3e0', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png',   coinType:2,    live:false, evmChain:false, xmr:false, version:0x30 },
-  { id:'btc',  name:'Bitcoin',      ticker:'BTC',  algo:'SHA-256d',   port:3336, color:'#f7931a', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png',   coinType:0,    live:false, evmChain:false, xmr:false, version:0x00 },
-  { id:'zec',  name:'Zcash',         ticker:'ZEC',  algo:'Equihash',   port:3341, color:'#f4b728', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/ZEC%20logo.png', coinType:133, live:false, evmChain:false, xmr:false, zcashStyle:true },
-  { id:'zen',  name:'Horizen',      ticker:'ZEN',  algo:'Equihash',   port:3341, color:'#0d9488', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png', coinType:121, live:false, evmChain:false, xmr:false, version:0x2089 },
-  { id:'btcz', name:'BitcoinZ',     ticker:'BTCZ', algo:'Equihash',   port:3341, color:'#f5a623', img:'https://raw.githubusercontent.com/btcz/bitcoinz/master/doc/imgs/bitcoinz.png', coinType:177, live:false, evmChain:false, xmr:false, zcashStyle:true },
-  { id:'kas',  name:'Kaspa',        ticker:'KAS',  algo:'kHeavyHash', port:3342, color:'#70c7ba', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/KAS%20logo.png',   coinType:111111, live:false, evmChain:false, xmr:false, kaspa:true },
+  { id:'ltc',  name:'Litecoin',     ticker:'LTC',  algo:'Scrypt',     port:3337, color:'#8cc3e0', img:'https://assets.coingecko.com/coins/images/2/large/litecoin.png',   coinType:2,    live:false, evmChain:false, xmr:false, version:0x30 },
+  { id:'btc',  name:'Bitcoin',      ticker:'BTC',  algo:'SHA-256d',   port:3336, color:'#f7931a', img:'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',   coinType:0,    live:false, evmChain:false, xmr:false, version:0x00 },
+  { id:'zec',  name:'Zcash',         ticker:'ZEC',  algo:'Equihash',   port:3341, color:'#f4b728', img:'https://assets.coingecko.com/coins/images/486/large/circle-zcash-color.png', coinType:133, live:false, evmChain:false, xmr:false, zcashStyle:true },
+  { id:'zen',  name:'Horizen',      ticker:'ZEN',  algo:'Equihash',   port:3341, color:'#0d9488', img:'https://assets.coingecko.com/coins/images/691/large/horizen.png', coinType:121, live:false, evmChain:false, xmr:false, version:0x2089 },
+  { id:'btcz', name:'BitcoinZ',     ticker:'BTCZ', algo:'Equihash',   port:3341, color:'#f5a623', img:'https://avatars.githubusercontent.com/u/33205606?s=200&v=4', coinType:177, live:false, evmChain:false, xmr:false, zcashStyle:true },
+  { id:'kas',  name:'Kaspa',        ticker:'KAS',  algo:'kHeavyHash', port:3342, color:'#70c7ba', img:'https://assets.coingecko.com/coins/images/25751/large/kaspa-icon-exchanges.png',   coinType:111111, live:false, evmChain:false, xmr:false, kaspa:true },
 ];
 
 // BIP44 derivation paths

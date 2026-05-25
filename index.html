@@ -136,6 +136,11 @@
       Horizen
       <span class="ticker">ZEN</span>
     </button>
+    <button class="coin-btn" onclick="show('dash')" id="btn-dash">
+      <img src="https://assets.coingecko.com/coins/images/19/large/dash-logo.png" alt="DASH" />
+      Dash
+      <span class="ticker">DASH</span>
+    </button>
     <button class="coin-btn" onclick="show('zec')" id="btn-zec">
       <img src="https://assets.coingecko.com/coins/images/486/large/circle-zcash-color.png" alt="ZEC" onerror="this.src='https://z.cash/wp-content/uploads/2021/07/zcash-icon-200.png'" />
       Zcash
@@ -367,6 +372,73 @@
       </div>
     </div>
 
+    <!-- DASH -->
+    <div class="page" id="page-dash">
+      <div class="page-header">
+        <img src="https://assets.coingecko.com/coins/images/19/large/dash-logo.png" alt="DASH" />
+        <div>
+          <h1>Dash × WATTx</h1>
+          <div class="sub">X11 · Merge mine DASH and earn WTX simultaneously</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">X11</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3340</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3340</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_DASH_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>SGMiner</h3>
+          <pre>sgminer --algorithm x11 \
+  --url stratum+tcp://stratum.wattxchange.app:3340 \
+  --user YOUR_DASH_ADDRESS.WORKER \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CCMiner</h3>
+          <pre>ccminer -a x11 \
+  -o stratum+tcp://stratum.wattxchange.app:3340 \
+  -u YOUR_DASH_ADDRESS.WORKER \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CPUMiner</h3>
+          <pre>cpuminer -a x11 \
+  -o stratum+tcp://stratum.wattxchange.app:3340 \
+  -u YOUR_DASH_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Dash</strong> uses X11 — a chained hashing algorithm combining 11 different hash functions. Live public ElectrumX servers are available at <code>electrum1-3.cipig.net:10061</code> (Komodo/AtomicDEX infrastructure), enabling trustless payouts and atomic swaps without running a full node.
+      </div>
+    </div>
+
     <!-- ZEC -->
     <div class="page" id="page-zec">
       <div class="page-header">
@@ -533,7 +605,7 @@
     history.replaceState(null, '', '#' + id)
   }
 
-  const validCoins = ['xmr','alt','ltc','btc','octa','zen','zec','btcz','kas']
+  const validCoins = ['xmr','alt','ltc','btc','octa','dash','zen','zec','btcz','kas']
   const hash = location.hash.replace('#', '')
   if (validCoins.includes(hash)) show(hash)
 

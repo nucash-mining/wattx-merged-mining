@@ -435,6 +435,15 @@ function p2pkhAddress(pubkeyHex, version) {
   return base58Check([version], h);
 }
 
+// WIF-encode a 32-byte private key for compressed secp256k1 keys
+// wifVersion: 0x80=BTC/ZEC/ZEN/BTCZ, 0xB0=LTC, 0xCC=DASH
+function toWIF(privKeyHex, wifVersion = 0x80) {
+  const privBytes = hexToBytes(privKeyHex);
+  // 0x01 suffix signals compressed public key
+  const payload = new Uint8Array([...privBytes, 0x01]);
+  return base58Check([wifVersion], payload);
+}
+
 // Horizen P2PKH uses 2-byte version 0x2089
 function zenAddress(pubkeyHex) {
   const pubBytes = hexToBytes(pubkeyHex);
@@ -612,7 +621,7 @@ async function deriveWallets() {
       } else if (chain.kaspa) {
         path = BIP44[chain.ticker];
         const node = hdNode.derivePath(path);
-        privKeyHex = node.privateKey;
+        privKeyHex = toWIF(node.privateKey, 0x80);
         const pubKeyHex = node.publicKey; // 33-byte compressed
         address = kaspaAddress(pubKeyHex);
         derivedWallets.KAS = address;
@@ -620,14 +629,15 @@ async function deriveWallets() {
         // ZCash-style 2-byte version: BTCZ uses [0x1C, 0xB8] → t1... addresses
         path = BIP44[chain.ticker] || `m/44'/${chain.coinType}'/0'/0/0`;
         const node = hdNode.derivePath(path);
-        privKeyHex = node.privateKey;
+        privKeyHex = toWIF(node.privateKey, 0x80);
         address = base58Check([0x1C, 0xB8], hash160(hexToBytes(node.publicKey)));
         derivedWallets[chain.ticker] = address;
       } else {
-        // UTXO: BTC / LTC / ZEN
+        // UTXO: BTC / LTC / DASH / ZEN
+        const wifVersion = { BTC: 0x80, LTC: 0xB0, DASH: 0xCC, ZEN: 0x80 }[chain.ticker] ?? 0x80;
         path = BIP44[chain.ticker];
         const node = hdNode.derivePath(path);
-        privKeyHex = node.privateKey;
+        privKeyHex = toWIF(node.privateKey, wifVersion);
         const pubKeyHex = node.publicKey;
         address = chain.id === 'zen'
           ? zenAddress(pubKeyHex)

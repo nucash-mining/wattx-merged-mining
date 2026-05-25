@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WATTx Merged Mining</title>
+  <meta name="description" content="Merge mine WATTx alongside Monero, Altcoinchain, Litecoin, and more. Earn WTX rewards while securing parent chains." />
+  <link rel="icon" href="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b0d14;
+      --surface:   #111422;
+      --border:    #1e2235;
+      --text:      #e2e8f0;
+      --muted:     #4a5080;
+      --accent:    #7c8cf8;
+      --green:     #4ade80;
+      --yellow:    #f0b90b;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── NAV ── */
+    nav { display: flex; align-items: center; gap: 14px; padding: 14px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+    nav img.logo { height: 32px; }
+    nav .brand { font-size: 16px; font-weight: 700; color: var(--yellow); }
+    nav .badge { margin-left: auto; font-size: 11px; background: var(--green)18; color: var(--green); border: 1px solid var(--green)44; border-radius: 20px; padding: 4px 10px; font-weight: 600; }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; flex: 1; }
+
+    /* ── SIDEBAR ── */
+    aside { width: 220px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 20px 12px; }
+    aside h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 0 8px; margin-bottom: 10px; }
+    .coin-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; text-align: left; margin-bottom: 3px; transition: background 0.15s; }
+    .coin-btn:hover { background: var(--surface); }
+    .coin-btn.active { background: var(--accent)18; border: 1px solid var(--accent)44; color: var(--accent); }
+    .coin-btn img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    .coin-btn .ticker { font-size: 11px; color: var(--muted); margin-left: auto; }
+    .coin-btn.active .ticker { color: var(--accent); }
+
+    /* ── MAIN ── */
+    main { flex: 1; padding: 32px 40px; max-width: 860px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .page-header img { width: 52px; height: 52px; border-radius: 50%; }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+    .page-header .sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+    .card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+    .card .value { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .card .value.green { color: var(--green); }
+    .card .value.yellow { color: var(--yellow); }
+
+    h2 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+    .stratum-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 28px; }
+    .stratum-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .stratum-row:last-child { margin-bottom: 0; }
+    .stratum-row .key { font-size: 11px; color: var(--muted); width: 80px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.4px; }
+    .stratum-row .val { font-family: monospace; font-size: 13px; background: #0f1117; border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; flex: 1; color: var(--text); }
+    .copy-btn { background: var(--border); border: none; border-radius: 6px; padding: 7px 12px; color: var(--muted); font-size: 12px; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+    .copy-btn:hover { background: #2a2f45; color: var(--text); }
+
+    .miner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .miner-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+    .miner-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+    .miner-card pre { font-size: 11px; background: #0f1117; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; overflow-x: auto; color: #a0aec0; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+
+    .info-box { background: var(--accent)0d; border: 1px solid var(--accent)33; border-radius: 10px; padding: 16px 18px; margin-bottom: 28px; font-size: 13px; line-height: 1.7; color: #a0aec0; }
+    .info-box strong { color: var(--text); }
+
+    @media (max-width: 700px) {
+      .layout { flex-direction: column; }
+      aside { width: 100%; border-right: none; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; }
+      aside h3 { display: none; }
+      main { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <img class="logo" src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="WATTx" />
+  <span class="brand">WATTx Merged Mining</span>
+  <span class="badge">● Live</span>
+</nav>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+    <h3>Parent Chains</h3>
+    <button class="coin-btn active" onclick="show('xmr')" id="btn-xmr">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/XMR%20logo.png" alt="XMR" />
+      Monero
+      <span class="ticker">XMR</span>
+    </button>
+    <button class="coin-btn" onclick="show('alt')" id="btn-alt">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/Altcoinchain%20logo.png" alt="ALT" />
+      Altcoinchain
+      <span class="ticker">ALT</span>
+    </button>
+    <button class="coin-btn" onclick="show('ltc')" id="btn-ltc">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png" alt="LTC" />
+      Litecoin
+      <span class="ticker">LTC</span>
+    </button>
+    <button class="coin-btn" onclick="show('btc')" id="btn-btc">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png" alt="BTC" />
+      Bitcoin
+      <span class="ticker">BTC</span>
+    </button>
+    <button class="coin-btn" onclick="show('octa')" id="btn-octa">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png" alt="OCTA" />
+      Octaspace
+      <span class="ticker">OCTA</span>
+    </button>
+    <button class="coin-btn" onclick="show('zen')" id="btn-zen">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png" alt="ZEN" />
+      Horizen
+      <span class="ticker">ZEN</span>
+    </button>
+    <button class="coin-btn" onclick="show('kas')" id="btn-kas">
+      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="KAS" style="opacity:0.5" />
+      Kaspa
+      <span class="ticker">KAS</span>
+    </button>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- XMR -->
+    <div class="page active" id="page-xmr">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/XMR%20logo.png" alt="XMR" />
+        <div>
+          <h1>Monero × WATTx</h1>
+          <div class="sub">RandomX · Merge mine XMR and earn WTX simultaneously</div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">RandomX</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3333</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Status</div><div class="value green">Live</div></div>
+      </div>
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val" id="xmr-host">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="copy('xmr-host')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3333</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_XMR_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>XMRig</h3>
+          <pre>{
+  "pools": [{
+    "url": "stratum+tcp://stratum.wattxchange.app:3333",
+    "user": "YOUR_XMR_ADDRESS",
+    "pass": "YOUR_WTX_ADDRESS",
+    "algo": "rx/0"
+  }]
+}</pre>
+        </div>
+        <div class="miner-card">
+          <h3>SRBMiner-Multi</h3>
+          <pre>--algorithm randomx
+--pool stratum+tcp://stratum.wattxchange.app:3333
+--wallet YOUR_XMR_ADDRESS
+--password YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>How it works:</strong> Your miner connects to WATTx's RandomX stratum. For every valid share you submit, the stratum simultaneously submits a Monero block template (earning XMR to your XMR address) and a WATTx AuxPoW proof (earning WTX to your WTX address). You earn on both chains from a single mining rig.
+      </div>
+    </div>
+
+    <!-- ALT -->
+    <div class="page" id="page-alt">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/Altcoinchain%20logo.png" alt="ALT" />
+        <div>
+          <h1>Altcoinchain × WATTx</h1>
+          <div class="sub">Ethash · Merge mine ALT and earn WTX simultaneously</div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">Ethash</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3334</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Chain ID</div><div class="value">2330</div></div>
+      </div>
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val" id="alt-host">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="copy('alt-host')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3334</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_ALT_ETH_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>lolMiner</h3>
+          <pre>lolMiner --algo ETHASH \
+  --pool stratum+tcp://stratum.wattxchange.app:3334 \
+  --user YOUR_ALT_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>TeamRedMiner</h3>
+          <pre>teamredminer -a ethash \
+  -o stratum+tcp://stratum.wattxchange.app:3334 \
+  -u YOUR_ALT_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>Ethminer</h3>
+          <pre>ethminer -P \
+  stratum+tcp://YOUR_ALT_ADDRESS@\
+  stratum.wattxchange.app:3334</pre>
+        </div>
+        <div class="miner-card">
+          <h3>NBMiner</h3>
+          <pre>nbminer -a ethash \
+  -o stratum+tcp://stratum.wattxchange.app:3334 \
+  -u YOUR_ALT_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Altcoinchain (Chain ID 2330)</strong> is an Ethereum-compatible PoW chain secured by Ethash. Merge mining with WATTx lets your GPU earn ALT block rewards while simultaneously producing WATTx AuxPoW blocks. No extra hardware required.
+      </div>
+    </div>
+
+    <!-- LTC -->
+    <div class="page" id="page-ltc">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png" alt="LTC" />
+        <div>
+          <h1>Litecoin × WATTx</h1>
+          <div class="sub">Scrypt · Coming Soon</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">Scrypt</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+      <div class="info-box">Scrypt merged mining support is implemented in WATTx core. A public Litecoin node with mining RPC access is required to activate this stratum. Support for Dogecoin (also Scrypt) will be enabled on the same port.
+      </div>
+    </div>
+
+    <!-- BTC -->
+    <div class="page" id="page-btc">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png" alt="BTC" />
+        <div>
+          <h1>Bitcoin × WATTx</h1>
+          <div class="sub">SHA-256d · Coming Soon</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">SHA-256d</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+      <div class="info-box">SHA-256d merged mining support is implemented in WATTx core. Requires access to a Bitcoin node with <code>getblocktemplate</code> RPC. BCH and BSV are also supported on this algorithm.
+      </div>
+    </div>
+
+    <!-- OCTA -->
+    <div class="page" id="page-octa">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png" alt="OCTA" />
+        <div>
+          <h1>Octaspace × WATTx</h1>
+          <div class="sub">Ethash · Same port as Altcoinchain</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">Ethash</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3334</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+      <div class="info-box">Octaspace uses Ethash, the same algorithm as Altcoinchain. Once a public OCTA node with <code>eth_getWork</code> RPC is configured, it can be added as a second Ethash parent chain on port 3334 alongside ALT.
+      </div>
+    </div>
+
+    <!-- ZEN -->
+    <div class="page" id="page-zen">
+      <div class="page-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png" alt="ZEN" style="background:#fff;padding:4px;border-radius:50%" />
+        <div>
+          <h1>Horizen × WATTx</h1>
+          <div class="sub">Equihash · Coming Soon</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">Equihash</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+      <div class="info-box">Equihash merged mining support is implemented in WATTx core. Horizen (ZEN) and Zcash (ZEC) use this algorithm. Requires a public node with <code>getblocktemplate</code>.
+      </div>
+    </div>
+
+    <!-- KAS -->
+    <div class="page" id="page-kas">
+      <div class="page-header">
+        <img src="https://kaspa.org/wp-content/uploads/2021/10/kaspa-logo-dark-400.png" alt="KAS" onerror="this.src='https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png'" />
+        <div>
+          <h1>Kaspa × WATTx</h1>
+          <div class="sub">kHeavyHash · Coming Soon</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">kHeavyHash</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">In Development</div></div>
+      </div>
+      <div class="info-box">kHeavyHash support is partially implemented in WATTx core (currently stubbed with SHA-256d as a placeholder). Full kHeavyHash implementation is in progress. Kaspa uses a REST-based block submission API rather than stratum, requiring a custom integration layer.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'))
+    document.getElementById('page-' + id).classList.add('active')
+    document.getElementById('btn-' + id).classList.add('active')
+  }
+
+  function copy(elId) {
+    const text = document.getElementById(elId).textContent
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(`[onclick="copy('${elId}')"]`)
+      const orig = btn.textContent
+      btn.textContent = 'Copied!'
+      setTimeout(() => { btn.textContent = orig }, 1500)
+    })
+  }
+</script>
+
+</body>
+</html>

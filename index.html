@@ -376,7 +376,12 @@
     document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('page-' + id).classList.add('active')
     document.getElementById('btn-' + id).classList.add('active')
+    history.replaceState(null, '', '#' + id)
   }
+
+  const validCoins = ['xmr','alt','ltc','btc','octa','zen','kas']
+  const hash = location.hash.replace('#', '')
+  if (validCoins.includes(hash)) show(hash)
 
   function copy(elId) {
     const text = document.getElementById(elId).textContent

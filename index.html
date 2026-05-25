@@ -229,7 +229,7 @@
     <!-- ALT -->
     <div class="page" id="page-alt">
       <div class="page-header">
-        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/Altcoinchain%20logo.png" alt="ALT" />
+        <img src="https://avatars.githubusercontent.com/u/115709361?v=4" alt="ALT" />
         <div>
           <h1>Altcoinchain × WATTx</h1>
           <div class="sub">Ethash · Merge mine ALT and earn WTX simultaneously</div>
@@ -269,14 +269,14 @@
         <div class="miner-card">
           <h3>lolMiner</h3>
           <pre>lolMiner --algo ETHASH \
-  --pool stratum+tcp://stratum.wattxchange.app:3334 \
+  --pool stratum+tcp://stratum.wattxchange.app:3333 \
   --user YOUR_ALT_ADDRESS \
   --pass YOUR_WTX_ADDRESS</pre>
         </div>
         <div class="miner-card">
           <h3>TeamRedMiner</h3>
           <pre>teamredminer -a ethash \
-  -o stratum+tcp://stratum.wattxchange.app:3334 \
+  -o stratum+tcp://stratum.wattxchange.app:3333 \
   -u YOUR_ALT_ADDRESS \
   -p YOUR_WTX_ADDRESS</pre>
         </div>
@@ -284,12 +284,12 @@
           <h3>Ethminer</h3>
           <pre>ethminer -P \
   stratum+tcp://YOUR_ALT_ADDRESS@\
-  stratum.wattxchange.app:3334</pre>
+  stratum.wattxchange.app:3333</pre>
         </div>
         <div class="miner-card">
           <h3>NBMiner</h3>
           <pre>nbminer -a ethash \
-  -o stratum+tcp://stratum.wattxchange.app:3334 \
+  -o stratum+tcp://stratum.wattxchange.app:3333 \
   -u YOUR_ALT_ADDRESS \
   -p YOUR_WTX_ADDRESS</pre>
         </div>
@@ -435,18 +435,67 @@ Password:  YOUR_WTX_ADDRESS</pre>
     <!-- OCTA -->
     <div class="page" id="page-octa">
       <div class="page-header">
-        <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png" alt="OCTA" />
+        <img src="https://avatars.githubusercontent.com/u/47415994?v=4" alt="OCTA" />
         <div>
           <h1>Octaspace × WATTx</h1>
-          <div class="sub">Ethash · Same port as Altcoinchain</div>
+          <div class="sub">Ethash · Same port as Altcoinchain · Merge mine OCTA and earn WTX simultaneously</div>
         </div>
       </div>
       <div class="cards">
         <div class="card"><div class="label">Algorithm</div><div class="value">Ethash</div></div>
-        <div class="card"><div class="label">Stratum Port</div><div class="value green">3334</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3333</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
         <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
       </div>
-      <div class="info-box">Octaspace uses Ethash, the same algorithm as Altcoinchain. Once a public OCTA node with <code>eth_getWork</code> RPC is configured, it can be added as a second Ethash parent chain on port 3334 alongside ALT.
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3333</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_OCTA_EVM_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>lolMiner</h3>
+          <pre>lolMiner --algo ETHASH \
+  --pool stratum+tcp://stratum.wattxchange.app:3333 \
+  --user YOUR_OCTA_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>TeamRedMiner</h3>
+          <pre>teamredminer -a ethash \
+  -o stratum+tcp://stratum.wattxchange.app:3333 \
+  -u YOUR_OCTA_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>NBMiner</h3>
+          <pre>nbminer -a ethash \
+  -o stratum+tcp://stratum.wattxchange.app:3333 \
+  -u YOUR_OCTA_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Octaspace</strong> is an EVM-compatible GPU compute marketplace chain secured by Ethash. It shares port 3333 with Altcoinchain — a single Ethash miner on port 3333 earns ALT, OCTA, and WTX simultaneously. Your EVM address works for both ALT and OCTA payouts.
       </div>
     </div>
 

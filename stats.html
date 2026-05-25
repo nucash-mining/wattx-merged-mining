@@ -316,6 +316,7 @@ const CHAINS = [
   { id:'octa', name:'Octaspace',    ticker:'OCTA', algo:'Ethash',     port:3333, color:'#6366f1', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png',  coinType:60,   live:false, evmChain:true, xmr:false, note:'Shares port 3333 with ALT' },
   { id:'ltc',  name:'Litecoin',     ticker:'LTC',  algo:'Scrypt',     port:3337, color:'#8cc3e0', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png',   coinType:2,    live:false, evmChain:false, xmr:false, version:0x30 },
   { id:'btc',  name:'Bitcoin',      ticker:'BTC',  algo:'SHA-256d',   port:3336, color:'#f7931a', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png',   coinType:0,    live:false, evmChain:false, xmr:false, version:0x00 },
+  { id:'zec',  name:'Zcash',         ticker:'ZEC',  algo:'Equihash',   port:3341, color:'#f4b728', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/ZEC%20logo.png', coinType:133, live:false, evmChain:false, xmr:false, zcashStyle:true },
   { id:'zen',  name:'Horizen',      ticker:'ZEN',  algo:'Equihash',   port:3341, color:'#0d9488', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png', coinType:121, live:false, evmChain:false, xmr:false, version:0x2089 },
   { id:'btcz', name:'BitcoinZ',     ticker:'BTCZ', algo:'Equihash',   port:3341, color:'#f5a623', img:'https://raw.githubusercontent.com/btcz/bitcoinz/master/doc/imgs/bitcoinz.png', coinType:177, live:false, evmChain:false, xmr:false, zcashStyle:true },
   { id:'kas',  name:'Kaspa',        ticker:'KAS',  algo:'kHeavyHash', port:3342, color:'#70c7ba', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/KAS%20logo.png',   coinType:111111, live:false, evmChain:false, xmr:false, kaspa:true },
@@ -329,6 +330,7 @@ const BIP44 = {
   LTC: "m/44'/2'/0'/0/0",
   BTC: "m/44'/0'/0'/0/0",
   ZEN: "m/44'/121'/0'/0/0",
+  ZEC: "m/44'/133'/0'/0/0",
   BTCZ:"m/44'/177'/0'/0/0",
   KAS: "m/44'/111111'/0'/0/0",
 };

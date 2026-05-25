@@ -317,6 +317,7 @@ const CHAINS = [
   { id:'ltc',  name:'Litecoin',     ticker:'LTC',  algo:'Scrypt',     port:3337, color:'#8cc3e0', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png',   coinType:2,    live:false, evmChain:false, xmr:false, version:0x30 },
   { id:'btc',  name:'Bitcoin',      ticker:'BTC',  algo:'SHA-256d',   port:3336, color:'#f7931a', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png',   coinType:0,    live:false, evmChain:false, xmr:false, version:0x00 },
   { id:'zen',  name:'Horizen',      ticker:'ZEN',  algo:'Equihash',   port:3341, color:'#0d9488', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png', coinType:121, live:false, evmChain:false, xmr:false, version:0x2089 },
+  { id:'btcz', name:'BitcoinZ',     ticker:'BTCZ', algo:'Equihash',   port:3341, color:'#f5a623', img:'https://raw.githubusercontent.com/btcz/bitcoinz/master/doc/imgs/bitcoinz.png', coinType:177, live:false, evmChain:false, xmr:false, zcashStyle:true },
   { id:'kas',  name:'Kaspa',        ticker:'KAS',  algo:'kHeavyHash', port:3342, color:'#70c7ba', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/KAS%20logo.png',   coinType:111111, live:false, evmChain:false, xmr:false, kaspa:true },
 ];
 
@@ -328,6 +329,7 @@ const BIP44 = {
   LTC: "m/44'/2'/0'/0/0",
   BTC: "m/44'/0'/0'/0/0",
   ZEN: "m/44'/121'/0'/0/0",
+  BTCZ:"m/44'/177'/0'/0/0",
   KAS: "m/44'/111111'/0'/0/0",
 };
 
@@ -610,6 +612,13 @@ async function deriveWallets() {
         const pubKeyHex = node.publicKey; // 33-byte compressed
         address = kaspaAddress(pubKeyHex);
         derivedWallets.KAS = address;
+      } else if (chain.zcashStyle) {
+        // ZCash-style 2-byte version: BTCZ uses [0x1C, 0xB8] → t1... addresses
+        path = BIP44[chain.ticker] || `m/44'/${chain.coinType}'/0'/0/0`;
+        const node = hdNode.derivePath(path);
+        privKeyHex = node.privateKey;
+        address = base58Check([0x1C, 0xB8], hash160(hexToBytes(node.publicKey)));
+        derivedWallets[chain.ticker] = address;
       } else {
         // UTXO: BTC / LTC / ZEN
         path = BIP44[chain.ticker];

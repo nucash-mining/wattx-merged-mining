@@ -136,6 +136,11 @@
       Horizen
       <span class="ticker">ZEN</span>
     </button>
+    <button class="coin-btn" onclick="show('btcz')" id="btn-btcz">
+      <img src="https://raw.githubusercontent.com/btcz/bitcoinz/master/doc/imgs/bitcoinz.png" alt="BTCZ" onerror="this.src='https://btczexplorer.blockhub.info/img/bitcoinz-logo.png'" />
+      BitcoinZ
+      <span class="ticker">BTCZ</span>
+    </button>
     <button class="coin-btn" onclick="show('kas')" id="btn-kas">
       <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="KAS" style="opacity:0.5" />
       Kaspa
@@ -357,6 +362,74 @@
       </div>
     </div>
 
+    <!-- BTCZ -->
+    <div class="page" id="page-btcz">
+      <div class="page-header">
+        <img src="https://raw.githubusercontent.com/btcz/bitcoinz/master/doc/imgs/bitcoinz.png" alt="BTCZ" onerror="this.src='https://btczexplorer.blockhub.info/img/bitcoinz-logo.png'" />
+        <div>
+          <h1>BitcoinZ × WATTx</h1>
+          <div class="sub">Equihash 200,9 · Merge mine BTCZ and earn WTX simultaneously</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">Equihash</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3341</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3341</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_BTCZ_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>miniZ</h3>
+          <pre>miniZ --algo 200_9 \
+  --url stratum+tcp://stratum.wattxchange.app:3341 \
+  --user YOUR_BTCZ_ADDRESS.WORKER \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>lolMiner</h3>
+          <pre>lolMiner --algo EQUIHASH \
+  --pool stratum+tcp://stratum.wattxchange.app:3341 \
+  --user YOUR_BTCZ_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>EWBF / GMiner</h3>
+          <pre>miner --algo equihash200_9 \
+  --server stratum.wattxchange.app \
+  --port 3341 \
+  --user YOUR_BTCZ_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>BitcoinZ</strong> is a community-driven, no-premine, no-founder-reward Equihash coin. It uses Equihash 200,9 — the same parameters as ZEC and ZEN — so any Equihash miner works on port 3341. BTCZ has its own DEX (built on AtomicDEX) with live ElectrumZ servers at <code>electrum1.btcz.rocks</code> and <code>electrum2.btcz.rocks</code>, enabling atomic swaps and trustless payouts.
+      </div>
+    </div>
+
     <!-- KAS -->
     <div class="page" id="page-kas">
       <div class="page-header">
@@ -387,7 +460,7 @@
     history.replaceState(null, '', '#' + id)
   }
 
-  const validCoins = ['xmr','alt','ltc','btc','octa','zen','kas']
+  const validCoins = ['xmr','alt','ltc','btc','octa','zen','btcz','kas']
   const hash = location.hash.replace('#', '')
   if (validCoins.includes(hash)) show(hash)
 

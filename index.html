@@ -26,6 +26,10 @@
     nav { display: flex; align-items: center; gap: 14px; padding: 14px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
     nav img.logo { height: 32px; }
     nav .brand { font-size: 16px; font-weight: 700; color: var(--yellow); }
+    nav .nav-links { display: flex; gap: 4px; margin-left: 16px; }
+    nav .nav-link { font-size: 12px; color: var(--muted); padding: 5px 11px; border-radius: 6px; text-decoration: none; transition: color 0.15s, background 0.15s; }
+    nav .nav-link:hover { color: var(--text); background: var(--surface); }
+    nav .nav-link.active { color: var(--accent); background: rgba(124,140,248,0.1); }
     nav .badge { margin-left: auto; font-size: 11px; background: var(--green)18; color: var(--green); border: 1px solid var(--green)44; border-radius: 20px; padding: 4px 10px; font-weight: 600; }
 
     /* ── LAYOUT ── */
@@ -90,6 +94,10 @@
 <nav>
   <img class="logo" src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="WATTx" />
   <span class="brand">WATTx Merged Mining</span>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">Start Mining</a>
+    <a href="stats.html" class="nav-link">Pool Stats</a>
+  </div>
   <span class="badge">● Live</span>
 </nav>
 

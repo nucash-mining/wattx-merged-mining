@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WATTx Merged Mining — Miner Stats</title>
+  <meta name="description" content="Live pool stats, miner dashboard, and deterministic wallet generation for all WATTx merge-mined chains." />
+  <link rel="icon" href="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0d14;
+      --surface: #111422;
+      --surf2:   #161929;
+      --border:  #1e2235;
+      --text:    #e2e8f0;
+      --muted:   #4a5080;
+      --accent:  #7c8cf8;
+      --green:   #4ade80;
+      --yellow:  #f0b90b;
+      --red:     #f87171;
+      --orange:  #fb923c;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    nav { display: flex; align-items: center; gap: 14px; padding: 13px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 20; }
+    nav img.logo { height: 30px; }
+    nav .brand { font-size: 15px; font-weight: 700; color: var(--yellow); }
+    nav .nav-links { display: flex; gap: 4px; margin-left: 16px; }
+    nav .nav-link { font-size: 12px; color: var(--muted); padding: 5px 11px; border-radius: 6px; text-decoration: none; transition: color 0.15s, background 0.15s; }
+    nav .nav-link:hover { color: var(--text); background: var(--surface); }
+    nav .nav-link.active { color: var(--accent); background: rgba(124,140,248,0.1); }
+    nav .wallet-area { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    nav .wallet-addr { font-size: 11px; font-family: monospace; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; }
+    nav .connect-btn { font-size: 12px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 7px 14px; cursor: pointer; transition: opacity 0.15s; }
+    nav .connect-btn:hover { opacity: 0.85; }
+    nav .connect-btn.connected { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+
+    /* LAYOUT */
+    .page-wrap { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 28px 28px 60px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab { font-size: 13px; font-weight: 500; color: var(--muted); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* STAT GRID */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+    .stat-card .sc-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+    .stat-card .sc-val { font-size: 22px; font-weight: 700; color: var(--accent); }
+    .stat-card .sc-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .sc-val.green { color: var(--green); }
+    .sc-val.yellow { color: var(--yellow); }
+    .sc-val.red { color: var(--red); }
+
+    /* ALGO CHAIN TABLE */
+    .chain-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+    .chain-table th { padding: 9px 14px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .chain-table td { padding: 12px 14px; font-size: 13px; color: var(--text); border-bottom: 1px solid rgba(30,34,53,0.6); vertical-align: middle; }
+    .chain-table tr:last-child td { border-bottom: none; }
+    .chain-table tbody tr:hover td { background: var(--surf2); }
+    .coin-cell { display: flex; align-items: center; gap: 10px; }
+    .coin-cell img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+    .coin-cell .cn { font-weight: 600; }
+    .coin-cell .ct { font-size: 11px; color: var(--muted); }
+    .algo-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .dot-live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 6px; box-shadow: 0 0 6px var(--green); }
+    .dot-pending { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); margin-right: 6px; }
+
+    /* WALLET PANEL */
+    .wallet-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+    .wallet-panel-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .wallet-panel-head h2 { font-size: 14px; font-weight: 600; }
+    .wallet-panel-head .wp-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .derive-btn { font-size: 12px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 7px 16px; cursor: pointer; transition: opacity 0.15s; }
+    .derive-btn:hover { opacity: 0.85; }
+    .derive-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .wallet-table { width: 100%; border-collapse: collapse; }
+    .wallet-table th { padding: 8px 18px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; background: rgba(15,17,24,0.5); }
+    .wallet-table td { padding: 12px 18px; font-size: 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+    .addr-cell { font-family: monospace; font-size: 12px; color: var(--text); word-break: break-all; }
+    .addr-cell .full { display: none; }
+    .copy-sm { background: var(--border); border: none; border-radius: 5px; padding: 4px 9px; color: var(--muted); font-size: 11px; cursor: pointer; transition: background 0.15s; margin-left: 8px; }
+    .copy-sm:hover { background: #2a2f45; color: var(--text); }
+    .pk-toggle { background: transparent; border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px; color: var(--muted); font-size: 10px; cursor: pointer; }
+    .pk-toggle:hover { color: var(--red); border-color: var(--red); }
+    .pk-reveal { font-family: monospace; font-size: 10px; color: var(--red); background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.2); border-radius: 5px; padding: 5px 8px; margin-top: 5px; word-break: break-all; display: none; }
+    .warning-box { margin: 16px 18px; padding: 12px 16px; background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.25); border-radius: 8px; font-size: 12px; color: #fca5a5; line-height: 1.6; }
+    .connect-prompt { padding: 48px 20px; text-align: center; color: var(--muted); }
+    .connect-prompt .cp-icon { font-size: 36px; margin-bottom: 12px; }
+    .connect-prompt p { font-size: 13px; margin-bottom: 14px; }
+
+    /* MINER STATS TABLE */
+    .miner-stats-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 13px; }
+    .miner-stats-table th { padding: 9px 14px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .miner-stats-table td { padding: 12px 14px; border-bottom: 1px solid rgba(30,34,53,0.6); vertical-align: middle; }
+    .miner-stats-table tr:last-child td { border-bottom: none; }
+    .pill { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+
+    /* BLOCKS FEED */
+    .blocks-feed { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+    .block-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; font-size: 12px; }
+    .block-row .br-height { font-family: monospace; color: var(--accent); font-weight: 600; min-width: 70px; }
+    .block-row .br-coin { display: flex; align-items: center; gap: 7px; min-width: 110px; }
+    .block-row .br-coin img { width: 18px; height: 18px; border-radius: 50%; }
+    .block-row .br-hash { font-family: monospace; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .block-row .br-time { color: var(--muted); white-space: nowrap; min-width: 80px; text-align: right; }
+    .block-row .br-reward { color: var(--green); font-weight: 600; min-width: 90px; text-align: right; }
+
+    /* SECTION HEADER */
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-head h2 { font-size: 14px; font-weight: 600; }
+    .refresh-btn { font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+    .refresh-btn:hover { color: var(--text); }
+
+    /* PAYMENTS TABLE */
+    .pay-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 28px; }
+    .pay-table th { padding: 8px 14px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .pay-table td { padding: 11px 14px; border-bottom: 1px solid rgba(30,34,53,0.5); vertical-align: middle; }
+    .pay-table tr:last-child td { border-bottom: none; }
+
+    /* SEARCH BAR */
+    .addr-search { display: flex; gap: 10px; margin-bottom: 20px; }
+    .addr-search input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; color: var(--text); font-size: 13px; font-family: monospace; outline: none; }
+    .addr-search input:focus { border-color: var(--accent); }
+    .addr-search input::placeholder { color: var(--muted); font-family: 'Segoe UI', system-ui, sans-serif; }
+    .addr-search button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .addr-search button:hover { opacity: 0.85; }
+
+    .empty-state { text-align: center; color: var(--muted); padding: 48px 20px; font-size: 13px; }
+    .empty-state .es-icon { font-size: 32px; margin-bottom: 10px; }
+
+    @media (max-width: 700px) {
+      .page-wrap { padding: 16px 14px 48px; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      nav .nav-links { gap: 2px; }
+      nav .nav-link { padding: 5px 7px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <img class="logo" src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="WATTx" />
+  <span class="brand">WATTx Merged Mining</span>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Start Mining</a>
+    <a href="stats.html" class="nav-link active">Pool Stats</a>
+  </div>
+  <div class="wallet-area">
+    <span class="wallet-addr" id="walletAddr" style="display:none"></span>
+    <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">Pool Overview</div>
+    <div class="tab" onclick="switchTab('wallets')">My Wallets</div>
+    <div class="tab" onclick="switchTab('mystats')">My Stats</div>
+    <div class="tab" onclick="switchTab('blocks')">Recent Blocks</div>
+  </div>
+
+  <!-- ── OVERVIEW TAB ── -->
+  <div class="tab-panel active" id="tab-overview">
+
+    <div class="section-head">
+      <h2>Pool Overview</h2>
+      <button class="refresh-btn" onclick="loadPoolStats()">↻ Refresh</button>
+    </div>
+
+    <div class="stat-grid" id="overviewStats">
+      <div class="stat-card"><div class="sc-label">Total Miners</div><div class="sc-val green" id="stat-miners">—</div><div class="sc-sub">connected now</div></div>
+      <div class="stat-card"><div class="sc-label">Pool Hashrate</div><div class="sc-val" id="stat-hashrate">—</div><div class="sc-sub">combined all algos</div></div>
+      <div class="stat-card"><div class="sc-label">Blocks Today</div><div class="sc-val yellow" id="stat-blocks">—</div><div class="sc-sub">all chains</div></div>
+      <div class="stat-card"><div class="sc-label">WTX Earned (24h)</div><div class="sc-val" id="stat-wtx">—</div><div class="sc-sub">AuxPoW rewards</div></div>
+    </div>
+
+    <div class="section-head" style="margin-top:4px">
+      <h2>Chains &amp; Algorithms</h2>
+    </div>
+
+    <table class="chain-table">
+      <thead>
+        <tr>
+          <th>Chain</th>
+          <th>Algorithm</th>
+          <th>Stratum Port</th>
+          <th>Hashrate</th>
+          <th>Miners</th>
+          <th>Blocks (24h)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="chainRows"></tbody>
+    </table>
+
+  </div>
+
+  <!-- ── MY WALLETS TAB ── -->
+  <div class="tab-panel" id="tab-wallets">
+
+    <div class="wallet-panel">
+      <div class="wallet-panel-head">
+        <div>
+          <h2>Deterministic Wallet Addresses</h2>
+          <div class="wp-sub">Derived from your EVM signature — same key always produces the same addresses</div>
+        </div>
+        <button class="derive-btn" id="deriveBtn" onclick="deriveWallets()" disabled>Connect wallet first</button>
+      </div>
+
+      <div id="walletsConnectPrompt" class="connect-prompt">
+        <div class="cp-icon">🔑</div>
+        <p>Connect your WTX EVM wallet to auto-generate payout addresses for all merge-mined chains.</p>
+        <p style="font-size:12px;color:var(--muted);max-width:480px;margin:0 auto">Your EVM private key signs a fixed message. The signature becomes entropy for BIP32 derivation — you can always re-derive the same addresses from the same wallet. Nothing is sent to any server.</p>
+      </div>
+
+      <div id="walletsTable" style="display:none">
+        <div class="warning-box">
+          ⚠ These private keys are derived from your EVM signature. Store them safely. Anyone with your EVM private key can also derive these keys. Use the "Show" button only on a trusted device.
+        </div>
+        <table class="wallet-table">
+          <thead>
+            <tr>
+              <th>Chain</th>
+              <th>Payout Address</th>
+              <th>Derivation Path</th>
+              <th>Private Key</th>
+            </tr>
+          </thead>
+          <tbody id="walletRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="wallet-panel" style="margin-top:4px">
+      <div class="wallet-panel-head">
+        <div>
+          <h2>How Address Derivation Works</h2>
+        </div>
+      </div>
+      <div style="padding:18px 20px;font-size:13px;color:#a0aec0;line-height:1.8">
+        <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px">
+          <li>You connect your EVM wallet (MetaMask, WTX EVM, or any Web3 wallet).</li>
+          <li>You sign the message <code style="font-size:11px;background:#0f1117;padding:2px 6px;border-radius:4px">"WATTx Merged Mining Wallet Derivation v1"</code>. This is a <strong style="color:var(--text)">read-only signature</strong> — no transaction, no gas, no funds moved.</li>
+          <li>The 65-byte signature is hashed with keccak256 to produce a 32-byte master seed.</li>
+          <li>A BIP32 HD wallet is derived from that seed. Each chain gets its own BIP44 derivation path (e.g. <code style="font-size:11px;background:#0f1117;padding:2px 6px;border-radius:4px">m/44'/0'/0'/0/0</code> for BTC).</li>
+          <li>EVM chains (ALT, OCTA, WTX) use your connected address directly — no separate key needed.</li>
+          <li>XMR uses Ed25519 derivation: the spend key is derived from <code style="font-size:11px;background:#0f1117;padding:2px 6px;border-radius:4px">keccak256(seed ∥ "XMR")</code> reduced mod the ed25519 group order.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MY STATS TAB ── -->
+  <div class="tab-panel" id="tab-mystats">
+
+    <div class="addr-search">
+      <input id="searchAddr" type="text" placeholder="Enter any payout address to look up stats…" />
+      <button onclick="lookupStats()">Look Up</button>
+    </div>
+
+    <div id="myStatsContent">
+      <div class="empty-state"><div class="es-icon">⛏</div>Enter an address above or connect your wallet to auto-fill.</div>
+    </div>
+
+  </div>
+
+  <!-- ── BLOCKS TAB ── -->
+  <div class="tab-panel" id="tab-blocks">
+    <div class="section-head">
+      <h2>Recent Blocks Found</h2>
+      <button class="refresh-btn" onclick="loadBlocks()">↻ Refresh</button>
+    </div>
+    <div id="blocksFeed" class="blocks-feed"></div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script type="module">
+// ─────────────────────────────────────────────────────────────
+// Crypto imports (noble libs via esm.sh CDN)
+// ─────────────────────────────────────────────────────────────
+import { sha256 } from 'https://esm.sh/@noble/hashes@1.4.0/sha256';
+import { ripemd160 } from 'https://esm.sh/@noble/hashes@1.4.0/ripemd160';
+import { secp256k1 } from 'https://esm.sh/@noble/curves@1.4.0/secp256k1';
+import { ed25519 } from 'https://esm.sh/@noble/curves@1.4.0/ed25519';
+
+// expose to outer scope
+window._crypto = { sha256, ripemd160, secp256k1, ed25519 };
+window._cryptoReady = true;
+window.dispatchEvent(new Event('cryptoReady'));
+</script>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+const API = 'https://api.wattxchange.app';
+const STRATUM_HOST = 'stratum.wattxchange.app';
+
+const CHAINS = [
+  { id:'xmr',  name:'Monero',       ticker:'XMR',  algo:'RandomX',    port:3334, color:'#ff6600', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/XMR%20logo.png',  coinType:128,  live:true,  evmChain:false, xmr:true  },
+  { id:'alt',  name:'Altcoinchain', ticker:'ALT',  algo:'Ethash',     port:3333, color:'#dc2626', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/Altcoinchain%20logo.png', coinType:60, live:true, evmChain:true, xmr:false },
+  { id:'octa', name:'Octaspace',    ticker:'OCTA', algo:'Ethash',     port:3333, color:'#6366f1', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/OCTA%20logo.png',  coinType:60,   live:false, evmChain:true, xmr:false, note:'Shares port 3333 with ALT' },
+  { id:'ltc',  name:'Litecoin',     ticker:'LTC',  algo:'Scrypt',     port:3337, color:'#8cc3e0', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/LTC%20logo.png',   coinType:2,    live:false, evmChain:false, xmr:false, version:0x30 },
+  { id:'btc',  name:'Bitcoin',      ticker:'BTC',  algo:'SHA-256d',   port:3336, color:'#f7931a', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/BTC%20logo.png',   coinType:0,    live:false, evmChain:false, xmr:false, version:0x00 },
+  { id:'zen',  name:'Horizen',      ticker:'ZEN',  algo:'Equihash',   port:3341, color:'#0d9488', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Horizen_logo.svg/120px-Horizen_logo.svg.png', coinType:121, live:false, evmChain:false, xmr:false, version:0x2089 },
+  { id:'kas',  name:'Kaspa',        ticker:'KAS',  algo:'kHeavyHash', port:3342, color:'#70c7ba', img:'https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/KAS%20logo.png',   coinType:111111, live:false, evmChain:false, xmr:false, kaspa:true },
+];
+
+// BIP44 derivation paths
+const BIP44 = {
+  XMR: "m/44'/128'/0'/0/0",
+  ALT: "m/44'/60'/0'/0/0",
+  OCTA:"m/44'/60'/0'/0/0",
+  LTC: "m/44'/2'/0'/0/0",
+  BTC: "m/44'/0'/0'/0/0",
+  ZEN: "m/44'/121'/0'/0/0",
+  KAS: "m/44'/111111'/0'/0/0",
+};
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+let provider = null;
+let signer   = null;
+let connectedAddress = null;
+let derivedWallets = null;
+
+// ─────────────────────────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['overview','wallets','mystats','blocks'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (id === 'blocks') loadBlocks();
+}
+
+// ─────────────────────────────────────────────────────────────
+// WALLET CONNECTION
+// ─────────────────────────────────────────────────────────────
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert('No Web3 wallet detected. Install MetaMask or a WTX-compatible wallet.');
+    return;
+  }
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    signer = provider.getSigner();
+    connectedAddress = await signer.getAddress();
+
+    document.getElementById('walletAddr').textContent =
+      connectedAddress.slice(0,6) + '…' + connectedAddress.slice(-4);
+    document.getElementById('walletAddr').style.display = '';
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Connected';
+    btn.classList.add('connected');
+    btn.onclick = null;
+
+    const deriveBtn = document.getElementById('deriveBtn');
+    deriveBtn.disabled = false;
+    deriveBtn.textContent = 'Derive All Wallets';
+
+    document.getElementById('walletsConnectPrompt').style.display = 'none';
+
+    // auto-fill search
+    if (derivedWallets) {
+      document.getElementById('searchAddr').value = derivedWallets.EVM;
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+window.connectWallet = connectWallet;
+
+// ─────────────────────────────────────────────────────────────
+// ADDRESS ENCODING HELPERS
+// ─────────────────────────────────────────────────────────────
+function hash160(pubkeyBytes) {
+  const h = window._crypto.sha256(pubkeyBytes);
+  return window._crypto.ripemd160(h);
+}
+
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function base58Encode(bytes) {
+  let n = BigInt('0x' + Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''));
+  let result = '';
+  const base = BigInt(58);
+  while (n > 0n) {
+    result = BASE58_ALPHABET[Number(n % base)] + result;
+    n = n / base;
+  }
+  for (const b of bytes) {
+    if (b === 0) result = '1' + result; else break;
+  }
+  return result;
+}
+
+function base58Check(versionBytes, payload) {
+  const full = new Uint8Array([...versionBytes, ...payload]);
+  const c1 = window._crypto.sha256(full);
+  const c2 = window._crypto.sha256(c1);
+  const checksum = c2.slice(0, 4);
+  return base58Encode(new Uint8Array([...full, ...checksum]));
+}
+
+// P2PKH address (BTC-style), version = 1 byte (0x00=BTC, 0x30=LTC)
+function p2pkhAddress(pubkeyHex, version) {
+  const pubBytes = hexToBytes(pubkeyHex);
+  const h = hash160(pubBytes);
+  return base58Check([version], h);
+}
+
+// Horizen P2PKH uses 2-byte version 0x2089
+function zenAddress(pubkeyHex) {
+  const pubBytes = hexToBytes(pubkeyHex);
+  const h = hash160(pubBytes);
+  return base58Check([0x20, 0x89], h);
+}
+
+// Kaspa uses bech32m with "kaspa:" prefix + schnorr pubkey (x-only)
+// Simple encoding: kaspa:q + base32(hash160(schnorr_pubkey))
+const BECH32_CHARS = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+function kaspaAddress(pubkeyHex) {
+  // Kaspa uses schnorr (x-only) pubkey
+  const pubBytes = hexToBytes(pubkeyHex);
+  // x-only = first 32 bytes of 33-byte compressed pubkey (strip prefix byte)
+  const xOnly = pubBytes.slice(1);
+  // blake2b-256 of pubkey (Kaspa uses blake2b, approximated with sha256 here for address display)
+  const payload = window._crypto.sha256(xOnly).slice(0, 20);
+  return 'kaspa:' + bech32mEncode(payload);
+}
+
+function bech32mEncode(data) {
+  // convert 8-bit groups to 5-bit groups
+  let acc = 0, bits = 0;
+  const result = [];
+  for (const byte of data) {
+    acc = (acc << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      bits -= 5;
+      result.push((acc >> bits) & 31);
+    }
+  }
+  if (bits > 0) result.push((acc << (5 - bits)) & 31);
+  // bech32m checksum constant = 0x2bc830a3
+  const CONST = 0x2bc830a3;
+  function polymod(v) {
+    let c = 1;
+    for (const d of v) {
+      const b = c >> 25;
+      c = ((c & 0x1ffffff) << 5) ^ d;
+      if (b & 1) c ^= 0x3b6a57b2;
+      if (b & 2) c ^= 0x26508e6d;
+      if (b & 4) c ^= 0x1ea119fa;
+      if (b & 8) c ^= 0x3d4233dd;
+      if (b & 16) c ^= 0x2a1462b3;
+    }
+    return c;
+  }
+  const hrp = 'kaspa';
+  const pre = [...hrp].map(c => c.charCodeAt(0) >> 5).concat([0],
+    [...hrp].map(c => c.charCodeAt(0) & 31));
+  const data5 = result;
+  const check = polymod([...pre, ...data5, 0,0,0,0,0,0]) ^ CONST;
+  const checksum = [0,1,2,3,4,5].map(i => (check >> (5*(5-i))) & 31);
+  return data5.concat(checksum).map(d => BECH32_CHARS[d]).join('');
+}
+
+// Monero address derivation
+const XMR_L = BigInt('0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed');
+
+function bytesToBigInt(bytes) {
+  return BigInt('0x' + Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''));
+}
+
+function bigIntToBytes32LE(n) {
+  const arr = new Uint8Array(32);
+  let tmp = n;
+  for (let i = 0; i < 32; i++) {
+    arr[i] = Number(tmp & 0xffn);
+    tmp >>= 8n;
+  }
+  return arr;
+}
+
+function xmrAddress(spendSeed) {
+  const { ed25519, sha256 } = window._crypto;
+
+  // spend key: seed reduced mod l (little-endian)
+  const seedBig = bytesToBigInt(spendSeed) % XMR_L;
+  const spendPriv = bigIntToBytes32LE(seedBig);
+
+  // view key: keccak256(spendPriv) mod l — using sha256 as approximation
+  const viewSeedHash = sha256(spendPriv);
+  const viewBig = bytesToBigInt(viewSeedHash) % XMR_L;
+  const viewPriv = bigIntToBytes32LE(viewBig);
+
+  // public keys via ed25519 scalar mult
+  const spendPub = ed25519.getPublicKey(spendPriv);
+  const viewPub  = ed25519.getPublicKey(viewPriv);
+
+  // Monero address: [0x12] + spendPub (32) + viewPub (32) + checksum (4)
+  // Monero uses its own keccak variant; we use sha256 for the checksum here
+  const payload = new Uint8Array([0x12, ...spendPub, ...viewPub]);
+  const checkHash = sha256(sha256(payload));
+  const full = new Uint8Array([...payload, ...checkHash.slice(0,4)]);
+
+  return xmrBase58(full);
+}
+
+// Monero Base58: encodes in 8-byte blocks -> 11 chars each
+const XMR_B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function xmrBase58Block(block) {
+  const sizes = [0,2,3,5,6,7,9,10,11];
+  let n = BigInt('0x' + Array.from(block).map(b=>b.toString(16).padStart(2,'0')).join(''));
+  const outLen = sizes[block.length];
+  let out = '';
+  for (let i = 0; i < outLen; i++) {
+    out = XMR_B58[Number(n % 58n)] + out;
+    n /= 58n;
+  }
+  return out;
+}
+function xmrBase58(bytes) {
+  let result = '';
+  for (let i = 0; i < bytes.length; i += 8) {
+    result += xmrBase58Block(bytes.slice(i, Math.min(i+8, bytes.length)));
+  }
+  return result;
+}
+
+function hexToBytes(hex) {
+  const h = hex.startsWith('0x') ? hex.slice(2) : hex;
+  return new Uint8Array(h.match(/../g).map(b => parseInt(b, 16)));
+}
+
+// ─────────────────────────────────────────────────────────────
+// WALLET DERIVATION
+// ─────────────────────────────────────────────────────────────
+async function deriveWallets() {
+  if (!signer || !connectedAddress) { alert('Connect wallet first.'); return; }
+  if (!window._cryptoReady) { alert('Crypto libraries still loading, please wait a moment.'); return; }
+
+  const btn = document.getElementById('deriveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sign the message in your wallet…';
+
+  try {
+    const message =
+      `WATTx Merged Mining Wallet Derivation v1\n\n` +
+      `This signature generates deterministic payout addresses for all merge-mined chains.\n` +
+      `No transaction is created. No funds are moved.\n\n` +
+      `Address: ${connectedAddress}`;
+
+    const sig = await signer.signMessage(message);
+
+    // master seed = keccak256(signature bytes)
+    const sigBytes = ethers.utils.arrayify(sig);
+    const masterSeedHex = ethers.utils.keccak256(sigBytes);
+    const masterSeed = ethers.utils.arrayify(masterSeedHex);
+
+    // BIP32 HD node from seed
+    const hdNode = ethers.utils.HDNode.fromSeed(masterSeedHex);
+
+    derivedWallets = { EVM: connectedAddress };
+    const rows = [];
+
+    for (const chain of CHAINS) {
+      let address, privKeyHex, path;
+
+      if (chain.evmChain) {
+        // EVM chains share the same address
+        address = connectedAddress;
+        privKeyHex = null; // user already has this
+        path = 'EVM wallet (connected)';
+      } else if (chain.xmr) {
+        // Monero: custom Ed25519 derivation
+        path = "keccak256(sig ∥ 'XMR') mod ℓ";
+        const xmrSeedHex = ethers.utils.keccak256(
+          ethers.utils.concat([masterSeed, ethers.utils.toUtf8Bytes('XMR')])
+        );
+        const spendSeed = ethers.utils.arrayify(xmrSeedHex);
+        address = xmrAddress(spendSeed);
+        privKeyHex = ethers.utils.hexlify(spendSeed);
+        derivedWallets.XMR = address;
+      } else if (chain.kaspa) {
+        path = BIP44[chain.ticker];
+        const node = hdNode.derivePath(path);
+        privKeyHex = node.privateKey;
+        const pubKeyHex = node.publicKey; // 33-byte compressed
+        address = kaspaAddress(pubKeyHex);
+        derivedWallets.KAS = address;
+      } else {
+        // UTXO: BTC / LTC / ZEN
+        path = BIP44[chain.ticker];
+        const node = hdNode.derivePath(path);
+        privKeyHex = node.privateKey;
+        const pubKeyHex = node.publicKey;
+        address = chain.id === 'zen'
+          ? zenAddress(pubKeyHex)
+          : p2pkhAddress(pubKeyHex, chain.version);
+        derivedWallets[chain.ticker] = address;
+      }
+
+      rows.push({ chain, address, privKeyHex, path });
+    }
+
+    renderWalletTable(rows);
+    document.getElementById('walletsTable').style.display = '';
+
+    // auto-fill miner stats search with EVM address
+    document.getElementById('searchAddr').value = connectedAddress;
+
+    btn.textContent = 'Re-derive Wallets';
+    btn.disabled = false;
+
+  } catch(e) {
+    console.error(e);
+    btn.textContent = 'Derive All Wallets';
+    btn.disabled = false;
+    if (e.code !== 4001) alert('Derivation failed: ' + e.message);
+  }
+}
+window.deriveWallets = deriveWallets;
+
+function renderWalletTable(rows) {
+  const tbody = document.getElementById('walletRows');
+  tbody.innerHTML = '';
+  for (const { chain, address, privKeyHex, path } of rows) {
+    const short = address
+      ? (address.length > 22 ? address.slice(0,12) + '…' + address.slice(-8) : address)
+      : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="coin-cell">
+          <img src="${chain.img}" alt="${chain.ticker}" onerror="this.style.display='none'">
+          <div><div class="cn">${chain.name}</div><div class="ct">${chain.ticker}</div></div>
+        </div>
+      </td>
+      <td>
+        <span class="addr-cell" title="${address}">${short}</span>
+        <button class="copy-sm" onclick="copyText('${address}',this)">Copy</button>
+        ${chain.evmChain ? '<span style="font-size:10px;color:var(--muted);margin-left:6px">EVM address</span>' : ''}
+      </td>
+      <td style="font-size:11px;color:var(--muted);font-family:monospace">${path}</td>
+      <td>
+        ${privKeyHex
+          ? `<button class="pk-toggle" onclick="togglePK(this)">Show</button>
+             <div class="pk-reveal">${privKeyHex}</div>`
+          : '<span style="font-size:11px;color:var(--muted)">Use EVM wallet</span>'
+        }
+      </td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function togglePK(btn) {
+  const reveal = btn.nextElementSibling;
+  if (!reveal) return;
+  const showing = reveal.style.display === 'block';
+  if (!showing) {
+    const confirmed = confirm(
+      '⚠ WARNING: Displaying your private key.\n\n' +
+      'Make sure nobody can see your screen. This key gives full access to funds on this chain.\n\n' +
+      'Continue?'
+    );
+    if (!confirmed) return;
+  }
+  reveal.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'Show' : 'Hide';
+}
+window.togglePK = togglePK;
+
+// ─────────────────────────────────────────────────────────────
+// POOL STATS
+// ─────────────────────────────────────────────────────────────
+const MOCK_POOL = {
+  miners: 0, hashrate: '0 H/s', blocks24h: 0, wtx24h: '0',
+  chains: Object.fromEntries(CHAINS.map(c => [c.id, { hashrate:'0 H/s', miners:0, blocks:0, luck:'—' }]))
+};
+
+async function loadPoolStats() {
+  let data = MOCK_POOL;
+  try {
+    const r = await fetch(API + '/merged/stats', { signal: AbortSignal.timeout(4000) });
+    if (r.ok) data = await r.json();
+  } catch(_) {}
+
+  document.getElementById('stat-miners').textContent    = data.miners || '0';
+  document.getElementById('stat-hashrate').textContent  = data.hashrate || '0 H/s';
+  document.getElementById('stat-blocks').textContent    = data.blocks24h || '0';
+  document.getElementById('stat-wtx').textContent       = data.wtx24h || '0';
+
+  renderChainRows(data.chains || {});
+}
+
+function renderChainRows(chainData) {
+  const tbody = document.getElementById('chainRows');
+  tbody.innerHTML = '';
+  for (const chain of CHAINS) {
+    const d = chainData[chain.id] || { hashrate:'—', miners:'—', blocks:'—', luck:'—' };
+    const algoColor = {
+      RandomX:'#ff6600', Ethash:'#3c3c3d', Scrypt:'#8cc3e0',
+      'SHA-256d':'#f7931a', Equihash:'#f4b728', kHeavyHash:'#70c7ba'
+    }[chain.algo] || '#7c8cf8';
+    const statusDot = chain.live
+      ? '<span class="dot-live"></span>Live'
+      : '<span class="dot-pending"></span><span style="color:var(--muted)">Pending node</span>';
+    if (chain.note) {
+      // secondary chain on same port — show compact row
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="coin-cell">
+          <img src="${chain.img}" alt="${chain.ticker}" onerror="this.style.display='none'">
+          <div><div class="cn">${chain.name}</div><div class="ct">${chain.ticker}</div></div>
+        </div>
+      </td>
+      <td><span class="algo-tag" style="background:${algoColor}22;color:${algoColor}">${chain.algo}</span></td>
+      <td><span style="font-family:monospace;font-size:13px">${chain.port}</span></td>
+      <td style="color:var(--accent)">${d.hashrate}</td>
+      <td style="color:var(--green)">${d.miners}</td>
+      <td style="color:var(--yellow)">${d.blocks}</td>
+      <td style="font-size:12px">${statusDot}${chain.note ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${chain.note}</div>`:''}
+      </td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// MINER STATS LOOKUP
+// ─────────────────────────────────────────────────────────────
+async function lookupStats() {
+  const addr = document.getElementById('searchAddr').value.trim();
+  if (!addr) return;
+  const content = document.getElementById('myStatsContent');
+  content.innerHTML = '<div class="empty-state"><div class="es-icon">⏳</div>Loading…</div>';
+
+  let data = null;
+  try {
+    const r = await fetch(`${API}/merged/miner/${encodeURIComponent(addr)}`, { signal: AbortSignal.timeout(5000) });
+    if (r.ok) data = await r.json();
+  } catch(_) {}
+
+  if (!data || !data.chains) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="es-icon">⛏</div>
+        <p>No mining activity found for this address.</p>
+        <p style="font-size:12px;margin-top:6px">Make sure your miner is running and using the correct payout address.</p>
+      </div>`;
+    return;
+  }
+  renderMinerStats(data, content);
+}
+window.lookupStats = lookupStats;
+
+function fmt(v) {
+  if (v === undefined || v === null) return '—';
+  return v;
+}
+
+function renderMinerStats(data, container) {
+  const totalUnpaid = data.chains
+    ? Object.values(data.chains).reduce((s,c) => s + (parseFloat(c.unpaid)||0), 0)
+    : 0;
+
+  container.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:24px">
+      <div class="stat-card"><div class="sc-label">Total Hashrate</div><div class="sc-val">${fmt(data.totalHashrate)}</div><div class="sc-sub">all algos</div></div>
+      <div class="stat-card"><div class="sc-label">Shares (24h)</div><div class="sc-val green">${fmt(data.shares24h)}</div><div class="sc-sub">${fmt(data.rejectRate)} reject rate</div></div>
+      <div class="stat-card"><div class="sc-label">WTX Earned (24h)</div><div class="sc-val yellow">${fmt(data.wtxEarned24h)}</div><div class="sc-sub">AuxPoW rewards</div></div>
+      <div class="stat-card"><div class="sc-label">Last Share</div><div class="sc-val" style="font-size:16px">${fmt(data.lastShare)}</div><div class="sc-sub">&nbsp;</div></div>
+    </div>
+
+    <div class="section-head"><h2>Per-Chain Stats</h2></div>
+    <table class="miner-stats-table">
+      <thead><tr>
+        <th>Chain</th><th>Hashrate</th><th>Shares (24h)</th>
+        <th>Unpaid Balance</th><th>Last Share</th><th>Payout Address</th>
+      </tr></thead>
+      <tbody>
+        ${CHAINS.map(chain => {
+          const c = (data.chains || {})[chain.id] || {};
+          return `<tr>
+            <td><div class="coin-cell">
+              <img src="${chain.img}" alt="${chain.ticker}" onerror="this.style.display='none'" style="width:20px;height:20px;border-radius:50%">
+              <span>${chain.ticker}</span>
+            </div></td>
+            <td style="color:var(--accent)">${fmt(c.hashrate)}</td>
+            <td style="color:var(--green)">${fmt(c.shares)}</td>
+            <td style="color:var(--yellow)">${fmt(c.unpaid)} ${chain.ticker}</td>
+            <td style="color:var(--muted);font-size:11px">${fmt(c.lastShare)}</td>
+            <td style="font-family:monospace;font-size:11px;color:var(--muted)">${c.address ? c.address.slice(0,14)+'…' : '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+
+    <div class="section-head"><h2>Payment History</h2></div>
+    ${renderPayments(data.payments)}`;
+}
+
+function renderPayments(payments) {
+  if (!payments || !payments.length) {
+    return '<div class="empty-state" style="padding:24px"><div class="es-icon">💸</div>No payments yet.</div>';
+  }
+  const rows = payments.map(p => `
+    <tr>
+      <td style="color:var(--muted);font-size:11px">${p.time || '—'}</td>
+      <td>
+        <div class="coin-cell">
+          <img src="${(CHAINS.find(c=>c.ticker===p.coin)||{}).img||''}" style="width:18px;height:18px;border-radius:50%" onerror="this.style.display='none'">
+          <span>${p.coin}</span>
+        </div>
+      </td>
+      <td style="color:var(--green);font-weight:600">${p.amount} ${p.coin}</td>
+      <td style="font-family:monospace;font-size:11px"><a href="${p.txUrl||'#'}" target="_blank" style="color:var(--accent);text-decoration:none">${p.txid ? p.txid.slice(0,18)+'…' : '—'}</a></td>
+    </tr>`).join('');
+  return `
+    <table class="pay-table">
+      <thead><tr><th>Time</th><th>Chain</th><th>Amount</th><th>TX</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RECENT BLOCKS
+// ─────────────────────────────────────────────────────────────
+async function loadBlocks() {
+  const feed = document.getElementById('blocksFeed');
+  feed.innerHTML = '<div class="empty-state"><div class="es-icon">⏳</div>Loading…</div>';
+
+  let blocks = [];
+  try {
+    const r = await fetch(API + '/merged/blocks?limit=30', { signal: AbortSignal.timeout(4000) });
+    if (r.ok) blocks = await r.json();
+  } catch(_) {}
+
+  if (!blocks.length) {
+    feed.innerHTML = '<div class="empty-state"><div class="es-icon">🔍</div>No blocks found yet. The pool is warming up.</div>';
+    return;
+  }
+
+  feed.innerHTML = '';
+  for (const blk of blocks) {
+    const chain = CHAINS.find(c => c.id === blk.chain || c.ticker === blk.coin) || {};
+    const div = document.createElement('div');
+    div.className = 'block-row';
+    div.innerHTML = `
+      <span class="br-height">#${blk.height || '—'}</span>
+      <span class="br-coin">
+        <img src="${chain.img||''}" alt="${blk.coin}" onerror="this.style.display='none'">
+        ${blk.coin || '—'}
+      </span>
+      <span class="br-hash">${blk.hash || '—'}</span>
+      <span class="br-reward">+${blk.reward || '?'} WTX</span>
+      <span class="br-time">${blk.time || '—'}</span>`;
+    feed.appendChild(div);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+window.copyText = copyText;
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+loadPoolStats();
+setInterval(loadPoolStats, 30000);
+</script>
+
+</body>
+</html>

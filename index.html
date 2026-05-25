@@ -152,7 +152,7 @@
       <span class="ticker">BTCZ</span>
     </button>
     <button class="coin-btn" onclick="show('kas')" id="btn-kas">
-      <img src="https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png" alt="KAS" style="opacity:0.5" />
+      <img src="https://assets.coingecko.com/coins/images/25751/large/kaspa-icon-exchanges.png" alt="KAS" onerror="this.src='https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png'" />
       Kaspa
       <span class="ticker">KAS</span>
     </button>
@@ -505,15 +505,65 @@ Password:  YOUR_WTX_ADDRESS</pre>
         <img src="https://assets.coingecko.com/coins/images/691/large/horizen.png" alt="ZEN" style="background:#fff;padding:4px;border-radius:50%" />
         <div>
           <h1>Horizen × WATTx</h1>
-          <div class="sub">Equihash · Coming Soon</div>
+          <div class="sub">Equihash 200,9 · Merge mine ZEN and earn WTX simultaneously</div>
         </div>
       </div>
       <div class="cards">
         <div class="card"><div class="label">Algorithm</div><div class="value">Equihash</div></div>
-        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3341</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
         <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
       </div>
-      <div class="info-box">Equihash merged mining support is implemented in WATTx core. Horizen (ZEN) and Zcash (ZEC) use this algorithm. Requires a public node with <code>getblocktemplate</code>.
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3341</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_ZEN_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>miniZ</h3>
+          <pre>miniZ --algo 200_9 \
+  --url stratum+tcp://stratum.wattxchange.app:3341 \
+  --user YOUR_ZEN_ADDRESS.WORKER \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>lolMiner</h3>
+          <pre>lolMiner --algo EQUIHASH \
+  --pool stratum+tcp://stratum.wattxchange.app:3341 \
+  --user YOUR_ZEN_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>GMiner</h3>
+          <pre>miner --algo equihash200_9 \
+  --server stratum.wattxchange.app \
+  --port 3341 \
+  --user YOUR_ZEN_ADDRESS \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Horizen (ZEN)</strong> is a privacy-focused sidechain platform. Port 3341 simultaneously merge mines ZEN, ZEC, and BTCZ — one miner earns on all three chains plus WTX. ZEN uses Equihash 200,9, the same parameters as ZEC and BTCZ. Note: ZEN payouts require a connected full node (no public ElectrumX infrastructure exists for ZEN); trustless ZEN atomic swaps use the Komodo/AtomicDEX protocol.
       </div>
     </div>
 
@@ -726,15 +776,65 @@ Password:  YOUR_WTX_ADDRESS</pre>
         <img src="https://assets.coingecko.com/coins/images/25751/large/kaspa-icon-exchanges.png" alt="KAS" onerror="this.src='https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png'" />
         <div>
           <h1>Kaspa × WATTx</h1>
-          <div class="sub">kHeavyHash · Coming Soon</div>
+          <div class="sub">kHeavyHash · Merge mine KAS and earn WTX simultaneously</div>
         </div>
       </div>
       <div class="cards">
         <div class="card"><div class="label">Algorithm</div><div class="value">kHeavyHash</div></div>
-        <div class="card"><div class="label">Stratum Port</div><div class="value yellow">TBA</div></div>
-        <div class="card"><div class="label">Status</div><div class="value yellow">In Development</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3342</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
       </div>
-      <div class="info-box">kHeavyHash support is partially implemented in WATTx core (currently stubbed with SHA-256d as a placeholder). Full kHeavyHash implementation is in progress. Kaspa uses a REST-based block submission API rather than stratum, requiring a custom integration layer.
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('stratum.wattxchange.app')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3342</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_KASPA_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>BzMiner</h3>
+          <pre>bzminer -a kaspa \
+  -p stratum+tcp://stratum.wattxchange.app:3342 \
+  -w YOUR_KASPA_ADDRESS.WORKER \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>lolMiner</h3>
+          <pre>lolMiner --algo KASPA \
+  --pool stratum+tcp://stratum.wattxchange.app:3342 \
+  --user YOUR_KASPA_ADDRESS.WORKER \
+  --pass YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>SRBMiner</h3>
+          <pre>SRBMiner-MULTI \
+  --algorithm kheavyhash \
+  --pool stratum+tcp://stratum.wattxchange.app:3342 \
+  --wallet YOUR_KASPA_ADDRESS \
+  --password YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Kaspa</strong> uses the kHeavyHash algorithm and a blockDAG (GHOSTDAG protocol) enabling extremely high block rates. Kaspa uses a gRPC/REST block submission API rather than traditional stratum — the WATTx pool includes a translation layer for standard miner compatibility. KAS payouts use the Kaspa REST API directly; no ElectrumX required.
       </div>
     </div>
 

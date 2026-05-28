@@ -156,6 +156,11 @@
       Kaspa
       <span class="ticker">KAS</span>
     </button>
+    <button class="coin-btn" onclick="show('bit')" id="btn-bit">
+      <img src="https://avatars.githubusercontent.com/u/121768826?v=4" alt="BIT" onerror="this.src='https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png'" />
+      Bitnet
+      <span class="ticker">BIT</span>
+    </button>
   </aside>
 
   <!-- ── MAIN ── -->
@@ -838,6 +843,72 @@ Password:  YOUR_WTX_ADDRESS</pre>
       </div>
     </div>
 
+    <!-- BIT -->
+    <div class="page" id="page-bit">
+      <div class="page-header">
+        <img src="https://avatars.githubusercontent.com/u/121768826?v=4" alt="BIT" onerror="this.src='https://raw.githubusercontent.com/nucash-mining/WATTxchange/main/WATT%20logo.png'" />
+        <div>
+          <h1>Bitnet × WATTx</h1>
+          <div class="sub">SHA-256d · Merge mine BIT and earn WTX simultaneously</div>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="label">Algorithm</div><div class="value">SHA-256d</div></div>
+        <div class="card"><div class="label">Stratum Port</div><div class="value green">3343</div></div>
+        <div class="card"><div class="label">WTX Reward Algo</div><div class="value yellow">X25X</div></div>
+        <div class="card"><div class="label">Status</div><div class="value yellow">Coming Soon</div></div>
+      </div>
+
+      <h2>Stratum Connection</h2>
+      <div class="stratum-box">
+        <div class="stratum-row">
+          <span class="key">Host</span>
+          <span class="val" id="bit-host">stratum.wattxchange.app</span>
+          <button class="copy-btn" onclick="copy('bit-host')">Copy</button>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Port</span>
+          <span class="val">3343</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">User</span>
+          <span class="val">YOUR_BIT_ADDRESS.WORKER_NAME</span>
+        </div>
+        <div class="stratum-row">
+          <span class="key">Pass</span>
+          <span class="val">YOUR_WTX_ADDRESS</span>
+        </div>
+      </div>
+
+      <h2>Miner Configs</h2>
+      <div class="miner-grid">
+        <div class="miner-card">
+          <h3>Antminer S21 / S19 (ASIC)</h3>
+          <pre>Pool URL:  stratum+tcp://stratum.wattxchange.app:3343
+Worker:    YOUR_BIT_ADDRESS.WORKER
+Password:  YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CGMiner / BFGMiner</h3>
+          <pre>cgminer \
+  -o stratum+tcp://stratum.wattxchange.app:3343 \
+  -u YOUR_BIT_ADDRESS.WORKER \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+        <div class="miner-card">
+          <h3>CPUMiner</h3>
+          <pre>cpuminer -a sha256d \
+  -o stratum+tcp://stratum.wattxchange.app:3343 \
+  -u YOUR_BIT_ADDRESS \
+  -p YOUR_WTX_ADDRESS</pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Bitnet (BIT)</strong> is a SHA-256d hybrid PoW/PoS blockchain (QTUM fork) with smart contract support. It shares the SHA-256d algorithm with Bitcoin but runs on a separate port (3343) to keep ASIC miners targeted specifically at BIT and WTX. ElectrumX support is planned for trustless payouts and atomic swaps.
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -850,7 +921,7 @@ Password:  YOUR_WTX_ADDRESS</pre>
     history.replaceState(null, '', '#' + id)
   }
 
-  const validCoins = ['xmr','alt','ltc','btc','octa','dash','zen','zec','btcz','kas']
+  const validCoins = ['xmr','alt','ltc','btc','octa','dash','zen','zec','btcz','kas','bit']
   const hash = location.hash.replace('#', '')
   if (validCoins.includes(hash)) show(hash)
 
